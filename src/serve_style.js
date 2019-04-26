@@ -80,7 +80,11 @@ module.exports = function(options, repo, params, id, publicUrl, reportTiles, rep
         query = '?' + queryParams.join('&');
       }
       return url.replace(
+<<<<<<< HEAD
+          'local://', req.protocol + '://' + req.hostname + '/') + query;
+=======
           'local://', utils.getPublicUrl(publicUrl, req)) + query;
+>>>>>>> a1a8996d3f5354c878a87473efafb581ae878e50
     };
 
     var styleJSON_ = clone(styleJSON);

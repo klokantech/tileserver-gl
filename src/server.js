@@ -196,7 +196,11 @@ function start(opts) {
         version: styleJSON.version,
         name: styleJSON.name,
         id: id,
+<<<<<<< HEAD
+        url: req.protocol + '://' + req.hostname +
+=======
         url: utils.getPublicUrl(opts.publicUrl, req) +
+>>>>>>> a1a8996d3f5354c878a87473efafb581ae878e50
              '/styles/' + id + '/style.json' + query
       });
     });
