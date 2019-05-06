@@ -11,8 +11,7 @@ var advancedPool = require('advanced-pool'),
 // see https://github.com/lovell/sharp/issues/371
 var sharp = require('sharp');
 
-var Canvas = require('canvas'),
-    clone = require('clone'),
+var clone = require('clone'),
     Color = require('color'),
     express = require('express'),
     mercator = new (require('@mapbox/sphericalmercator'))(),
@@ -20,6 +19,9 @@ var Canvas = require('canvas'),
     mbtiles = require('@mapbox/mbtiles'),
     proj4 = require('proj4'),
     request = require('request');
+
+// var Canvas = require('canvas');
+var { createCanvas, Canvas } = require('canvas');
 
 var utils = require('./utils');
 
@@ -145,6 +147,7 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
   var createPool = function(ratio, min, max) {
     var createRenderer = function(ratio, createCallback) {
       var renderer = new mbgl.Map({
+        mode: "tile",
         ratio: ratio,
         request: function(req, callback) {
           var protocol = req.url.split(':')[0];
@@ -431,8 +434,9 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
           image.overlayWith(opt_overlay);
         }
         if (watermark) {
-          var canvas = new Canvas(scale * width, scale * height);
-          var ctx = canvas.getContext('2d');
+          //var canvas = new Canvas(scale * width, scale * height);
+          var mycanvas = createCanvas(scale * width, scale * height);
+          var ctx = mycanvas.getContext('2d');
           ctx.scale(scale, scale);
           ctx.font = '10px sans-serif';
           ctx.strokeWidth = '1px';
@@ -441,7 +445,7 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
           ctx.fillStyle = 'rgba(0,0,0,.4)';
           ctx.fillText(watermark, 5, height - 5);
 
-          image.overlayWith(canvas.toBuffer());
+          image.overlayWith(mycanvas.toBuffer());
         }
 
         var formatQuality = (params.formatQuality || {})[format] ||
@@ -538,8 +542,9 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
       center[1] -= minEdge;
     }
 
-    var canvas = new Canvas(scale * w, scale * h);
-    var ctx = canvas.getContext('2d');
+    //var canvas = new Canvas(scale * w, scale * h);
+    var mycanvas = new Canvas(scale*w, scale*h);
+    var ctx = mycanvas.getContext('2d');
     ctx.scale(scale, scale);
     if (bearing) {
       ctx.translate(w / 2, h / 2);
@@ -568,7 +573,7 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
       ctx.stroke();
     }
 
-    return canvas.toBuffer();
+    return mycanvas.toBuffer();
   };
 
   var calcZForBBox = function(bbox, w, h, query) {
