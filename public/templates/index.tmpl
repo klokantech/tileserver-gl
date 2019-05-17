@@ -13,17 +13,73 @@
       el.setSelectionRange(0, el.value.length);
       return false;
     }
+    function saveinsession(element_id) {
+      var id = document.getElementById(element_id);
+      sessionStorage.setItem(id.name, id.value);
+      id.value = '';
+    }
+    function isAuthenticated() {
+      const token = sessionStorage.getItem('token');
+      try {
+        const { exp } = parseJwt(token)
+        if (Date.now() / 1000 > exp) {
+          return false;
+        }
+      } catch (err) {
+          return false;
+      }
+      return true;
+    }
+    function parseJwt (token) {
+        var base64Url = token.split('.')[1];
+        var base64 = decodeURIComponent(atob(base64Url).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(base64);
+    };
+    function loadimage (image_src, element, token) {
+      var xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
+          var img = document.createElement('img');
+          img.src = URL.createObjectURL(xhr.response);
+          var item = document.getElementById(element);
+          item.replaceChild(img, item.childNodes[0]);
+        }
+      };
+      xhr.open('GET', image_src, true);
+      xhr.setRequestHeader('Authorization', token);
+      xhr.send();
+    }
+    function refreshImages() {
+      var token = sessionStorage.getItem('token');
+    {{#if styles}}
+      {{#each styles}}
+      loadimage("{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}", "item-{{@key}}", token);
+      {{/each}}
+    {{/if}}
+    }
+    function init() {
+      if (!isAuthenticated()) {
+        sessionStorage.removeItem('token');
+      } else {
+        refreshImages();
+      }
+      document.getElementById('token').value = '';
+    }
   </script>
 </head>
-<body>
+<body onload="init();">
   <section>
     <h1 class="title {{#if is_light}}light{{/if}}"><img src="{{public_url}}images/logo.png" alt="TileServer GL" /></h1>
     <h2 class="subtitle">Vector {{#if is_light}}<s>and raster</s>{{else}}and raster{{/if}} maps with GL styles</h2>
+    <h4>JWT Token <input id="token" name="token" type="text" size="90"> <a class="btn2" href="#" onclick="saveinsession('token');refreshImages();return false;">Save token</a></h4>
     {{#if styles}}
       <h2 class="box-header">Styles</h2>
       <div class="box">
       {{#each styles}}
-        <div class="item">
+        <div class="item" id="item-{{@key}}">
           {{#if thumbnail}}
             <img src="{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}" alt="{{name}} preview" />
           {{else}}
