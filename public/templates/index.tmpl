@@ -37,16 +37,21 @@
         }).join(''));
         return JSON.parse(base64);
     };
-    function loadimage (image_src, element, token) {
+    function loadimage (image_src, name, key, token) {
       var xhr = new XMLHttpRequest();
       xhr.responseType = 'blob';
       xhr.onreadystatechange = function () {
+        var img = document.createElement('img');
+        var item = document.getElementById('item-'+key);
+        var oimg = document.getElementById('img-'+key);
+        oimg.alt = "";
+        img.alt = name+" preview";
         if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200) {
-          var img = document.createElement('img');
           img.src = URL.createObjectURL(xhr.response);
-          var item = document.getElementById(element);
-          item.replaceChild(img, item.childNodes[0]);
+        } else {
+          img.src = "{{public_url}}images/placeholder.png";
         }
+        item.replaceChild(img, item.childNodes[0]);
       };
       xhr.open('GET', image_src, true);
       xhr.setRequestHeader('Authorization', token);
@@ -56,17 +61,16 @@
       var token = sessionStorage.getItem('token');
     {{#if styles}}
       {{#each styles}}
-      loadimage("{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}", "item-{{@key}}", token);
+      loadimage("{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}", "{{name}}", "{{@key}}", token);
       {{/each}}
     {{/if}}
     }
     function init() {
       if (!isAuthenticated()) {
         sessionStorage.removeItem('token');
-      } else {
-        refreshImages();
-      }
+      } 
       document.getElementById('token').value = '';
+      refreshImages();
     }
   </script>
 </head>
@@ -81,7 +85,7 @@
       {{#each styles}}
         <div class="item" id="item-{{@key}}">
           {{#if thumbnail}}
-            <img src="{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}" alt="{{name}} preview" />
+            <img id="img-{{@key}}" src="{{public_url}}styles/{{@key}}/{{thumbnail}}{{&../key_query}}" alt="{{name}} preview"/>
           {{else}}
             <img src="{{public_url}}images/placeholder.png" alt="{{name}} preview" />
           {{/if}}
