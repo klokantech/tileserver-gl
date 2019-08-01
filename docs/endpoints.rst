@@ -43,7 +43,7 @@ Static images
   * ``fill`` - color to use as the fill (e.g. ``red``, ``rgba(255,255,255,0.5)``, ``#0000ff``)
   * ``stroke`` - color of the path stroke
   * ``width`` - width of the stroke
-  * ``padding`` - "percetange" padding for fitted endpoints (area-based and path autofit)
+  * ``padding`` - "percentage" padding for fitted endpoints (area-based and path autofit)
 
     * value of ``0.1`` means "add 10% size to each side to make sure the area of interest is nicely visible"
 
