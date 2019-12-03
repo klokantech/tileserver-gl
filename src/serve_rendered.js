@@ -266,6 +266,18 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
     styleJSON.glyphs = 'fonts://' + styleJSON.glyphs;
   }
 
+  (styleJSON.layers || []).forEach(function(layer) {
+    if (layer && layer.paint) {
+      // Remove (flatten) 3D buildings
+      if (layer.paint['fill-extrusion-height']) {
+        layer.paint['fill-extrusion-height'] = 0;
+      }
+      if (layer.paint['fill-extrusion-base']) {
+        layer.paint['fill-extrusion-base'] = 0;
+      }
+    }
+  });
+
   var tileJSON = {
     'tilejson': '2.0.0',
     'name': styleJSON.name,
@@ -410,6 +422,13 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
         params.width *= 2;
         params.height *= 2;
       }
+      
+      var tileMargin = Math.max(options.tileMargin || 0, 0);
+      if (z > 2 && tileMargin > 0) {
+        params.width += tileMargin * 2 * scale;
+        params.height += tileMargin * 2 * scale;
+      }
+
       renderer.render(params, function(err, data) {
         pool.release(renderer);
         if (err) {
@@ -424,6 +443,10 @@ module.exports = function(options, repo, params, id, publicUrl, dataResolver) {
             channels: 4
           }
         });
+        
+        if (z > 2 && tileMargin > 0) {
+            image.extract({ left: tileMargin * scale, top: tileMargin * scale, width: width * scale, height: height * scale });
+        }
 
         if (z == 0) {
           // HACK: when serving zoom 0, resize the 0 tile from 512 to 256

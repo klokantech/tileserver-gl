@@ -27,7 +27,8 @@ Example::
       "maxSize": 2048,
       "pbfAlias": "pbf",
       "serveAllFonts": false,
-      "serveStaticMaps": true
+      "serveStaticMaps": true,
+      "tileMargin": 0
     },
     "styles": {
       "basic": {
@@ -94,6 +95,13 @@ Default value is ``3``, maximum ``9``.
 Maximum image side length to be allowed to be rendered (including scale factor).
 Be careful when changing this value since there are hardware limits that need to be considered.
 Default is ``2048``.
+
+``tileMargin``
+--------------
+
+Additional image side length added during tile rendering that is cropped from the delivered tile. This is useful for resolving the issue with cropped labels, 
+but it does come with a performance degradation, because additional, adjacent vector tiles need to be loaded to genenrate a single tile.
+Default is ``0`` to disable this processing. 
 
 ``minRendererPoolSizes``
 ------------------------

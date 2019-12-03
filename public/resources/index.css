@@ -81,6 +81,7 @@ section {
 }
 .item img {
   position: absolute;
+  display: block;
   margin: 30px;
   width: 128px;
   height: 128px;
