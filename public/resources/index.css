@@ -23,6 +23,9 @@ body{
   font-family:'OpenSans', sans-serif, Arial;
   font-size: 14px;
   margin:0;
+  background-repeat:no-repeat !important;
+  background-size: contain !important;
+  background-image: url(/images/header-map-1280px.png);
 }
 a{
   color: #499DCE;
@@ -81,6 +84,7 @@ section {
 }
 .item img {
   position: absolute;
+  display: block;
   margin: 30px;
   width: 128px;
   height: 128px;
@@ -151,8 +155,8 @@ footer {
   font-size:12px;
 }
 footer img {
-  width: 118px;
-  height: 32px;
+  width: 113px;
+  height: 31px;
 }
 footer .t {
   display:none;
@@ -167,28 +171,6 @@ footer a {
 .details h3, .identifier {
   max-width: 550px;
   word-break: break-all;
-}
-
-/* body background image */
-body {
-  background-repeat:no-repeat !important;
-  background-size: contain !important;
-  background-image: url(/images/header-map-640px.png);
-}
-@media only screen and (min-width: 641px) {
-  body {
-    background-image: url(/images/header-map-1280px.png);
-  }
-}
-@media only screen and (min-width: 1281px) {
-  body {
-    background-image: url(/images/header-map-1600px.png);
-  }
-}
-@media only screen and (min-width: 1601px) {
-  body {
-    background-image: url(/images/header-map-2560px.png);
-  }
 }
 
 /* Responsive */

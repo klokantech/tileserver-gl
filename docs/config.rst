@@ -27,7 +27,9 @@ Example::
       "maxSize": 2048,
       "pbfAlias": "pbf",
       "serveAllFonts": false,
-      "serveStaticMaps": true
+      "serveAllStyles": false,
+      "serveStaticMaps": true,
+      "tileMargin": 0
     },
     "styles": {
       "basic": {
@@ -95,6 +97,13 @@ Maximum image side length to be allowed to be rendered (including scale factor).
 Be careful when changing this value since there are hardware limits that need to be considered.
 Default is ``2048``.
 
+``tileMargin``
+--------------
+
+Additional image side length added during tile rendering that is cropped from the delivered tile. This is useful for resolving the issue with cropped labels,
+but it does come with a performance degradation, because additional, adjacent vector tiles need to be loaded to genenrate a single tile.
+Default is ``0`` to disable this processing.
+
 ``minRendererPoolSizes``
 ------------------------
 
@@ -115,6 +124,13 @@ The value and considerations are similar to ``minRendererPoolSizes`` above.
 If you have plenty of memory, try setting these equal to or slightly above your processor count, e.g. if you have four processors, try a value of ``[6]``.
 If you need to conserve memory, try lower values for scale factors that are less common.
 Default is ``[16, 8, 4]``.
+
+``serveAllStyles``
+------------------------
+
+If this option is enabled, all the styles from the ``paths.styles`` will be served. (No recursion, only ``.json`` files are used.)
+The process will also watch for changes in this directory and remove/add more styles dynamically.
+It is recommended to also use the ``serveAllFonts`` option when using this option.
 
 ``watermark``
 -----------

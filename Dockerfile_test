@@ -2,8 +2,7 @@
 # Simply run "docker build -f Dockerfile_test ."
 # WARNING: sometimes it fails with a core dumped exception
 
-FROM node:6-stretch
-MAINTAINER Petr Sloup <petr.sloup@klokantech.com>
+FROM node:10-stretch
 
 RUN apt-get -qq update \
 && DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -24,7 +23,7 @@ RUN apt-get -qq update \
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN wget -O test_data.zip https://github.com/klokantech/tileserver-gl/releases/download/v1.3.0/test_data.zip
+RUN wget -O test_data.zip https://github.com/maptiler/tileserver-gl/releases/download/v1.3.0/test_data.zip
 RUN unzip -q test_data.zip -d test_data
 
 ENV NODE_ENV="test"

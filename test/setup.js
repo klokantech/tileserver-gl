@@ -3,6 +3,8 @@ process.env.NODE_ENV = 'test';
 global.should = require('should');
 global.supertest = require('supertest');
 
+require = require('esm')(module);
+
 before(function() {
   console.log('global setup');
   process.chdir('test_data');

@@ -1,7 +1,8 @@
-FROM node:6.15.1-stretch
-MAINTAINER Petr Sloup <petr.sloup@klokantech.com>
+FROM node:10-stretch
 
 ENV NODE_ENV="production"
+ENV CHOKIDAR_USEPOLLING=1
+ENV CHOKIDAR_INTERVAL=500
 VOLUME /data
 WORKDIR /data
 EXPOSE 80
