@@ -40,10 +40,10 @@ module.exports.getTileUrls = (req, domains, path, format, publicUrl, aliases) =>
   const key = req.query.key;
   const queryParams = [];
   if (req.query.key) {
-    queryParams.push(`key=${req.query.key}`);
+    queryParams.push(`key=${encodeURIComponent(req.query.key)}`);
   }
   if (req.query.style) {
-    queryParams.push(`style=${req.query.style}`);
+    queryParams.push(`style=${encodeURIComponent(req.query.style)}`);
   }
   const query = queryParams.length > 0 ? (`?${queryParams.join('&')}`) : '';
 

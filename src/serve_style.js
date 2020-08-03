@@ -17,7 +17,7 @@ const fixUrl = (req, url, publicUrl, opt_nokey) => {
   }
   const queryParams = [];
   if (!opt_nokey && req.query.key) {
-    queryParams.unshift(`key=${req.query.key}`);
+    queryParams.unshift(`key=${encodeURIComponent(req.query.key)}`);
   }
   let query = '';
   if (queryParams.length) {

@@ -243,7 +243,7 @@ function start(opts) {
 
   app.get('/styles.json', (req, res, next) => {
     const result = [];
-    const query = req.query.key ? (`?key=${req.query.key}`) : '';
+    const query = req.query.key ? (`?key=${encodeURIComponent(req.query.key)}`) : '';
     for (const id of Object.keys(serving.styles)) {
       const styleJSON = serving.styles[id].styleJSON;
       result.push({
@@ -319,8 +319,8 @@ function start(opts) {
           data['public_url'] = opts.publicUrl || '/';
           data['is_light'] = isLight;
           data['key_query_part'] =
-            req.query.key ? `key=${req.query.key}&amp;` : '';
-          data['key_query'] = req.query.key ? `?key=${req.query.key}` : '';
+            req.query.key ? `key=${encodeURIComponent(req.query.key)}&amp;` : '';
+          data['key_query'] = req.query.key ? `?key=${encodeURIComponent(req.query.key)}` : '';
           if (template === 'wmts') res.set('Content-Type', 'text/xml');
           return res.status(200).send(compiled(data));
         });
@@ -362,7 +362,7 @@ function start(opts) {
       if (!data_.is_vector) {
         if (center) {
           const centerPx = mercator.px([center[0], center[1]], center[2]);
-          data_.thumbnail = `${center[2]}/${Math.floor(centerPx[0] / 256)}/${Math.floor(centerPx[1] / 256)}.${data_.format}`;
+          data_.thumbnail = `${center[2]}/${Math.floor(centerPx[0] / 256)}/${Math.floor(centerPx[1] / 256)}.${data_.tileJSON.format}`;
         }
 
         data_.xyz_link = utils.getTileUrls(
