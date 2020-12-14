@@ -11,7 +11,7 @@ const zlib = require('zlib');
 // see https://github.com/lovell/sharp/issues/371
 const sharp = require('sharp');
 
-const { createCanvas } = require('canvas');
+const { createCanvas, Image } = require('canvas');
 
 const clone = require('clone');
 const Color = require('color');
@@ -101,35 +101,50 @@ const extractPathFromQuery = (query, transformer) => {
   const pathParts = (query.path || '').split('|');
   const path = [];
   for (const pair of pathParts) {
-    const pairParts = pair.split(',');
-    if (pairParts.length === 2) {
-      let pair;
-      if (query.latlng === '1' || query.latlng === 'true') {
-        pair = [+(pairParts[1]), +(pairParts[0])];
-      } else {
-        pair = [+(pairParts[0]), +(pairParts[1])];
-      }
-      if (transformer) {
-        pair = transformer(pair);
-      }
-      path.push(pair);
+    path.push(splitCoordinatePair(pair, query, transformer));
     }
-  }
   return path;
 };
 
-const renderOverlay = (z, x, y, bearing, pitch, w, h, scale,
-  path, query) => {
-  if (!path || path.length < 2) {
-    return null;
-  }
-  const precisePx = (ll, zoom) => {
-    const px = mercator.px(ll, 20);
-    const scale = Math.pow(2, zoom - 20);
-    return [px[0] * scale, px[1] * scale];
-  };
+const extractMarkerFromQuery = (query, transformer) => {
 
-  const center = precisePx([x, y], z);
+  const markerPositions = [];
+
+  const markerParts = (query.markers || query.marker || '').split('|');
+  
+  if(query.marker && markerParts[0] === 'center') {return null;}
+
+  markerParts.forEach(marker => {
+    markerPositions.push(splitCoordinatePair(marker,query,transformer));
+  });
+
+  return markerPositions;
+};
+
+const splitCoordinatePair = (pair, query, transformer) => {
+  const pairParts = pair.split(',');
+    if (pairParts.length === 2) {
+      let coordinatePair;
+      if (query.latlng === '1' || query.latlng === 'true') {
+        coordinatePair = [+(pairParts[1]), +(pairParts[0])];
+      } else {
+        coordinatePair = [+(pairParts[0]), +(pairParts[1])];
+      }
+      if (transformer) {
+        coordinatePair = transformer(coordinatePair);
+      }
+      return coordinatePair;
+    }
+}
+
+const precisePx = (ll, zoom) => {
+  const px = mercator.px(ll, 20);
+  const scale = Math.pow(2, zoom - 20);
+  return [px[0] * scale, px[1] * scale];
+};
+
+const georeferenceMapCenter = (x, y, z, h) => {
+  let center = precisePx([x, y], z);
 
   const mapHeight = 512 * (1 << z);
   const maxEdge = center[1] + h / 2;
@@ -139,6 +154,49 @@ const renderOverlay = (z, x, y, bearing, pitch, w, h, scale,
   } else if (minEdge < 0) {
     center[1] -= minEdge;
   }
+
+  return center;
+};
+
+const renderMarkerOverlay = (x, y, z, w, h, scale, marker) => {
+  const center = georeferenceMapCenter(x, y, z, h);
+
+  const canvas = createCanvas(scale * w, scale * h);
+
+  const markers = [];
+
+  marker.forEach(m => {
+    markers.push(precisePx(m,z));
+  })
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(scale, scale);
+  ctx.translate(-center[0] + w / 2, -center[1] + h / 2);
+
+  try {
+    const imageFile = fs.readFileSync(__dirname + '/../public/resources/images/markerImage.png');
+    const markerImage = new Image;
+    markerImage.src = imageFile;
+
+    markers.forEach(marker => {
+      ctx.drawImage(markerImage, marker[0] - (markerImage.width / 2) * 0.2, marker[1] - (markerImage.height) * 0.2, markerImage.width * 0.2, markerImage.height * 0.2)
+    })
+    ctx.fill();
+    ctx.stroke();
+  }
+  catch(e) {
+    console.log('Errorloading marker image', e);
+  }
+  return canvas.toBuffer();
+};
+
+const renderOverlay = (z, x, y, bearing, pitch, w, h, scale,
+  path, query) => {
+  if (!path || path.length < 2) {
+    return null;
+  }
+  
+  const center = georeferenceMapCenter(x, y, z,h);
 
   const canvas = createCanvas(scale * w, scale * h);
   const ctx = canvas.getContext('2d');
@@ -423,6 +481,13 @@ module.exports = {
           const ll = transformer([x, y]);
           x = ll[0];
           y = ll[1];
+        }
+
+        if(req.query.marker || req.query.markers) {
+          let markers = extractMarkerFromQuery(req.query, transformer);
+          markers = markers === null ? [[x,y]] : markers;
+          const overlay = renderMarkerOverlay(x, y, z, w, h, scale, markers);
+          return respondImage(item, z, x, y, bearing, pitch, w, h, scale, format, res, next, overlay);
         }
 
         const path = extractPathFromQuery(req.query, transformer);
