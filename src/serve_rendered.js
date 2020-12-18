@@ -719,6 +719,9 @@ module.exports = {
       'type': 'baselayer'
     };
     const attributionOverride = params.tilejson && params.tilejson.attribution;
+    if (styleJSON.center && styleJSON.zoom) {
+      tileJSON.center = styleJSON.center.concat(styleJSON.zoom);
+    }
     Object.assign(tileJSON, params.tilejson || {});
     tileJSON.tiles = params.domains || options.domains;
     utils.fixTileJSONCenter(tileJSON);
