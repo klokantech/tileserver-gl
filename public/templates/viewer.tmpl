@@ -23,16 +23,20 @@
       q.indexOf('vector') >= 0 ? 'vector' :
         (q.indexOf('raster') >= 0 ? 'raster' :
           (mapboxgl.supported() ? 'vector' : 'raster'));
+
+    var keyMatch = location.search.match(/[\?\&]key=([^&]+)/i);
+    var key = keyMatch ? '?key=' + keyMatch[1] : '';
+
     if (preference == 'vector') {
-      mapboxgl.setRTLTextPlugin('{{public_url}}mapbox-gl-rtl-text.js{{&key_query}}');
+      mapboxgl.setRTLTextPlugin('{{public_url}}mapbox-gl-rtl-text.js' + key);
       var map = new mapboxgl.Map({
         container: 'map',
-        style: '{{public_url}}styles/{{id}}/style.json{{&key_query}}',
+        style: '{{public_url}}styles/{{id}}/style.json' + key,
         hash: true
       });
       map.addControl(new mapboxgl.NavigationControl());
     } else {
-      var map = L.mapbox.map('map', '{{public_url}}styles/{{id}}.json{{&key_query}}', { zoomControl: false });
+      var map = L.mapbox.map('map', '{{public_url}}styles/{{id}}.json' + key, { zoomControl: false });
       new L.Control.Zoom({ position: 'topright' }).addTo(map);
       setTimeout(function() {
         new L.Hash(map);
