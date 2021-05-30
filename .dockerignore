@@ -1,7 +1,6 @@
-.git
-docs/_build
-node_modules
-test_data
-light
-config.json
-*.mbtiles
+*
+!src
+!public
+!package.json
+!package-lock.json
+!docker-entrypoint.sh

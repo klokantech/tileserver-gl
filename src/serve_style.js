@@ -43,7 +43,7 @@ module.exports = {
       }
       // mapbox-gl-js viewer cannot handle sprite urls with query
       if (styleJSON_.sprite) {
-        styleJSON_.sprite = fixUrl(req, styleJSON_.sprite, item.publicUrl, true);
+        styleJSON_.sprite = fixUrl(req, styleJSON_.sprite, item.publicUrl, false);
       }
       if (styleJSON_.glyphs) {
         styleJSON_.glyphs = fixUrl(req, styleJSON_.glyphs, item.publicUrl, false);
