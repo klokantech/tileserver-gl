@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{name}} - TileServer GL</title>
-  {{#is_vector}}
   <link rel="stylesheet" type="text/css" href="{{public_url}}mapbox-gl.css{{&key_query}}" />
   <link rel="stylesheet" type="text/css" href="{{public_url}}mapbox-gl-inspect.css{{&key_query}}" />
   <script src="{{public_url}}mapbox-gl.js{{&key_query}}"></script>
@@ -16,39 +15,53 @@
     #layerList {position:absolute;top:35px;right:0;bottom:0;width:240px;overflow:auto;}
     #layerList div div {width:15px;height:15px;display:inline-block;}
   </style>
-  {{/is_vector}}
-  {{^is_vector}}
-  <link rel="stylesheet" type="text/css" href="{{public_url}}mapbox.css{{&key_query}}" />
-  <script src="{{public_url}}mapbox.js{{&key_query}}"></script>
-  <script src="{{public_url}}leaflet-hash.js{{&key_query}}"></script>
-  <style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
-  </style>
-  {{/is_vector}}
 </head>
 <body>
-  {{#is_vector}}
   <h1>{{name}}</h1>
   <div id="map"></div>
   <div id="layerList"></div>
   <pre id="propertyList"></pre>
   <script>
+  var token = sessionStorage.getItem('token');
   var map = new mapboxgl.Map({
     container: 'map',
     hash: true,
+    transformRequest: (url, resourceType) => {
+      if (token) {
+        return {
+          url: url,
+          headers: { 'Authorization': token }
+        };
+      }
+    },
+  {{#is_vector}}
     style: {
       version: 8,
       sources: {
-        'vector_layer_': {
+        'vector_layer': {
           type: 'vector',
           url: '{{public_url}}data/{{id}}.json{{&key_query}}'
         }
       },
       layers: []
     }
+  {{/is_vector}}
+  {{^is_vector}}
+    style: {
+      version: 8,
+      sources: {
+        'raster_tiles': {
+          type: 'raster',
+          url: '{{public_url}}data/{{id}}.json{{&key_query}}',
+          tileSize: 256
+        }
+      },
+      layers: [{ "id": "simple_tiles", "type": "raster", "source": "raster_tiles", "minzoom": 0, "maxzoom": 22 }]
+    }
+  {{/is_vector}}
   });
   map.addControl(new mapboxgl.NavigationControl());
+  {{#is_vector}}
   var inspect = new MapboxInspect({
     showInspectMap: true,
     showInspectButton: false
@@ -68,22 +81,7 @@
       });
     })
   });
-  </script>
   {{/is_vector}}
-  {{^is_vector}}
-  <h1 style="display:none;">{{name}}</h1>
-  <div id='map'></div>
-  <script>
-    var map = L.mapbox.map('map', '{{public_url}}data/{{id}}.json{{&key_query}}', { zoomControl: false });
-    map.eachLayer(function(layer) {
-      // do not add scale prefix even if retina display is detected
-      layer.scalePrefix = '.';
-    });
-    new L.Control.Zoom({ position: 'topright' }).addTo(map);
-    setTimeout(function() {
-      new L.Hash(map);
-    }, 0);
   </script>
-  {{/is_vector}}
 </body>
 </html>

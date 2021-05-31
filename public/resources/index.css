@@ -129,6 +129,23 @@ section {
 .btn:first-child:hover {
   background: #395D73;
 }
+.btn2 {
+  padding: 0;
+  border-radius:4px;
+  background-color: #499DCE;
+  background: linear-gradient(90deg, #5aaad8, #4a9ecf);
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-weight: bold;
+  display: inline-block;
+  width: 120px;
+  line-height: 36px;
+}
+.btn2:hover {
+  color: #fff;
+  background: #395D73;
+}
 footer {
   width:100%;
   border-top:1px solid #ededed;

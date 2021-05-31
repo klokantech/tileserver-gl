@@ -6,9 +6,6 @@
   <title>{{name}} - TileServer GL</title>
   <link rel="stylesheet" type="text/css" href="{{public_url}}mapbox-gl.css{{&key_query}}" />
   <script src="{{public_url}}mapbox-gl.js{{&key_query}}"></script>
-  <link rel="stylesheet" type="text/css" href="{{public_url}}mapbox.css{{&key_query}}" />
-  <script src="{{public_url}}mapbox.js{{&key_query}}"></script>
-  <script src="{{public_url}}leaflet-hash.js{{&key_query}}"></script>
   <style>
     body { margin:0; padding:0; }
     #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -18,26 +15,32 @@
   <h1 style="display:none;">{{name}}</h1>
   <div id='map'></div>
   <script>
+    var token = sessionStorage.getItem('token');
     var q = (location.search || '').substr(1).split('&');
     var preference =
       q.indexOf('vector') >= 0 ? 'vector' :
         (q.indexOf('raster') >= 0 ? 'raster' :
           (mapboxgl.supported() ? 'vector' : 'raster'));
+    mapboxgl.setRTLTextPlugin('{{public_url}}mapbox-gl-rtl-text.js{{&key_query}}');
     if (preference == 'vector') {
-      mapboxgl.setRTLTextPlugin('{{public_url}}mapbox-gl-rtl-text.js{{&key_query}}');
-      var map = new mapboxgl.Map({
-        container: 'map',
-        style: '{{public_url}}styles/{{id}}/style.json{{&key_query}}',
-        hash: true
-      });
-      map.addControl(new mapboxgl.NavigationControl());
+      style = '{{public_url}}styles/{{id}}/style.json{{&key_query}}';
     } else {
-      var map = L.mapbox.map('map', '{{public_url}}styles/{{id}}.json{{&key_query}}', { zoomControl: false });
-      new L.Control.Zoom({ position: 'topright' }).addTo(map);
-      setTimeout(function() {
-        new L.Hash(map);
-      }, 0);
+      style = JSON.parse('{ "version": 8, "sources": { "raster-tiles": { "type": "raster", "url": "{{public_url}}styles/{{id}}.json{{&key_query}}", "tileSize": 256}}, "layers": [{ "id": "simple-tiles", "type": "raster", "source": "raster-tiles", "minzoom": 0, "maxzoom": 22 }]}');
     }
+    var map = new mapboxgl.Map({
+      container: 'map',
+      style: style,
+      hash: true,
+      transformRequest: (url, resourceType) => {
+        if (token) {
+          return {
+              url: url,
+              headers: { 'Authorization': token }
+          };
+        }
+      }
+    });    
+    map.addControl(new mapboxgl.NavigationControl());
   </script>
 </body>
 </html>
